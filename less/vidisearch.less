@@ -1,0 +1,105 @@
+.vidi-search{
+
+    .search{
+        font-size: 14px;
+    }
+
+    .search-list{
+        cursor: pointer;
+        .category{
+            padding-top: 5px;
+            padding-bottom: 5px;
+            padding-left: 0;
+
+            &:hover{
+                background-color: darkcyan;
+                transition: all 0.2s;
+
+                .text span{
+                    color: white;
+                }
+
+                svg{
+                    fill: white;
+                }
+            }
+
+            .icon{
+                margin-right: 0;
+            }
+
+            .text span{
+                font-size: 16px!important;
+                display: inline;
+                vertical-align: middle;
+            }
+        }
+        .result{
+            padding-bottom: 0px;
+            padding-top: 5px;
+            
+            &.selected{
+                background-color: darkcyan;
+                transition: all 0.2s;
+
+                .text span{
+                    color: white;
+                }
+
+                svg{
+                    fill: white;
+                }
+            }
+
+            .text span{
+                font-size: 12px!important;
+            }
+
+            &:hover{
+                background-color: darkcyan;
+                transition: all 0.2s;
+
+                .text span{
+                    color: white;
+                }
+            }
+        }
+    }
+
+    .search-selector{
+
+        .button:not(:first-child){
+            margin-left: 5px;
+
+        }
+
+        .button{
+            display: inline-block;
+            height: 30px;
+            width: 30px;
+            background: lightgray;
+            padding: 5px;
+            margin-bottom: 5px;
+            cursor: pointer;
+
+            svg{
+                padding-right: 5px;
+            }
+
+            path{
+                fill: white;
+            }
+
+
+            &.enabled{
+                background: #009688;
+            }
+        }
+    }
+
+   
+}
+
+.MuiTooltip-tooltip-2{
+    font-size: 14px!important;
+}

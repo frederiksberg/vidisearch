@@ -1,13 +1,12 @@
 'use strict';
 
+import SvgIcon from '@material-ui/core/SvgIcon';
+
 /**
  * @type {*|exports|module.exports}
  */
 var React = require('react');;
 
-var ReactDOM = require('react-dom');
-
-import Business from '@material-ui/icons/Business';
 var cloud;
 
 var layerGroup = L.layerGroup();
@@ -23,58 +22,10 @@ var config = require('../../../../config/config.js');
 var mainSearch;
 
 
-class SearchItem extends React.Component{
-    constructor(props){
-        super(props);
-    }
-
-    render(){
-        let liStyle= {
-            padding:'4px 16px'
-        };
-        return <a style={liStyle} id={this.props.searcher+':'+this.props.value} href="#" className="list-group-item">                           
-                        {this.props.value}
-                </a>;             
-    }
-        
-    
-}
-
-class SearchList extends React.Component{
-            
-    constructor(props){
-        super(props);
-       // this.searcher = this.props.searcher;
-       this.onItemClick = this.onItemClick.bind(this);
-
-       this.state = {
-            items: this.props.items
-       };
-    }
-    onItemClick(e){
-     //   console.log(e.target.id); 
-        let searcher = searchers[this.props.searcher];
-        let me = this;
-        searcher.handleSearch(e.target.id).then(function(fulfilled){
-            let items = fulfilled.map((item) => {
-                return item.tekst.toString();
-            });
-            me.setState({items : items});
-        }); 
-      }
-    render(){
-        const items = this.props.items;
-        let me = this;
-        const searchItems = items.map((item) =>
-            <SearchItem key={item.toString()} searcher={me.props.searcher} value={item}/>
-        );
-
-        
-    
-        return (
-            <div onClick={this.props.onAdd} className="list-group">{searchItems}</div>
-        );
-    }
+function BuildingIcon(props) {
+    return <SvgIcon {...props}>
+        <path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z" />
+    </SvgIcon>
 }
 
 module.exports = {
@@ -82,21 +33,20 @@ module.exports = {
         cloud = o.cloud;
         utils = o.utils;
         mapObj = cloud.get().map;
-        mainSearch = o.extensions.mainSearch.index;
+        mainSearch = o.extensions.vidisearch.index;
 
-         mainSearch.registerSearcher({
-           key: 'Lokalplaner',
-           obj: {'searcher': this,'title':'Lokalplaner', 'icon':<Business/>}
-       });  
+        mainSearch.registerSearcher({
+            key: 'Lokalplaner',
+            obj: { 'searcher': this, 'title': 'Lokalplaner', 'icon': <BuildingIcon /> }
+        });
     },
 
-    init: function(){
-        let me = this;
+    init: function () {
+
     },
 
-
-    search: function(searchTerm){
-        let url = 'https://ballerup.mapcentia.com/api/v2/elasticsearch/search/collector/snit_plansearch/lokalplan';
+    search: function (searchTerm) {
+        let url = 'http://gc2.frederiksberg.dk/api/v2/elasticsearch/search/frederiksberg/elasticsearch/lokalplan_dokument';
         let query = `{
             "_source":{
               "excludes":[
@@ -110,85 +60,87 @@ module.exports = {
               }
             }
           }`;
-        return new Promise(function(resolve, reject){
-            $.post(url, query,function(data){
+        return new Promise(function (resolve, reject) {
+            $.post(url, query, function (data) {
                 let res = data.hits.hits.map((item) => {
-                    let it = item['_source']['properties']; 
-                    return {'title': it.plannavn, 
-                            'id': it.planid, 
-                            'icon': <Business/>
-                        };
+                    let it = item['_source']['properties'];
+                    return {
+                        name: it.plannavn,
+                        'id': it.planid
+                    };
                 });
-                resolve(res);
-                },'json'); 
+                resolve({ type: 'Lokalplaner', icon: <BuildingIcon />, results: res });
+            }, 'json');
         });
-        
+
     },
 
-    handleSearch: function(searchTerm){
-        let url = `https://ballerup.mapcentia.com/api/v1/sql/collector?q=SELECT plannr, plannavn, doklink, anvendelsegenerel, 
-                   the_geom from snit_plansearch.lokalplan_geom where planid =${searchTerm}&srs=4326`;
-        return new Promise(function(resolve, reject){
+    handleSearch: function (item, setCaretPosition) {
+        let url = `http://gc2.frederiksberg.dk/api/v1/sql/frederiksberg?q=SELECT plannr, plannavn, doklink, 
+        the_geom from job_plandatadk.lokalplan where planid =${item.id}&srs=4326`;
 
-            $.getJSON(url,function(data){
+        return new Promise(function (resolve, reject) {
+
+            $.getJSON(url, function (data) {
                 let geom = data.features[0].geometry;
                 console.log(geom);
                 let properties = data.features[0].properties;
-                let layer = L.geoJson(geom,{
+                let layer = L.geoJson(geom, {
                     "color": "blue",
                     "weight": 1,
                     "opacity": 1,
                     "fillOpacity": 0.1,
                     "dashArray": '5,3'
                 });
-    
+
+                layerGroup.clearLayers();
+                console.log(layer);
+                layerGroup.addLayer(layer).addTo(mapObj);
+                mapObj.fitBounds(layer.getBounds());
+                let comp = <div>
+                    <ul className="list-group">
+                        <li className="list-group-item">Plannavn : {properties.plannavn}</li>
+                        <li className="list-group-item">Plannr   : {properties.plannr}</li>
+                        <li className="list-group-item">Anvendelse: {properties.anvendelsegenerel}</li>
+                        <li className="list-group-item">
+                            <a href={properties.doklink} target="_blank" >Plandokument</a>
+                        </li>
+                    </ul>
+                </div>;
+                resolve({ component: comp, newQuery: item.id });
+            })
+        });
+        //   console.log(searchTerm);
+    },
+
+    handleMouseOver: function (s) {
+        console.log('plan mouseover');
+        let url = `http://gc2.frederiksberg.dk/api/v1/sql/frederiksberg?q=SELECT plannr, plannavn, doklink, 
+        the_geom from job_plandatadk.lokalplan where planid =${searchTerm}&srs=4326`;
+        return new Promise(function (resolve, reject) {
+            $.getJSON(url, function (data) {
+                let geom = data.features[0].geometry;
+                console.log(geom);
+                let properties = data.features[0].properties;
+                let layer = L.geoJson(geom, {
+                    "color": "blue",
+                    "weight": 1,
+                    "opacity": 1,
+                    "fillOpacity": 0.1,
+                    "dashArray": '5,3'
+                });
+
                 layerGroup.clearLayers();
                 layerGroup.addLayer(layer).addTo(mapObj);
                 mapObj.fitBounds(layer.getBounds());
-               let comp = <div>
-                   <ul className="list-group">
-                    <li className="list-group-item">Plannavn : {properties.plannavn}</li>
-                    <li className="list-group-item">Plannr   : {properties.plannr}</li>
-                    <li className="list-group-item">Anvendelse: {properties.anvendelsegenerel}</li>
-                    <li className="list-group-item">
-                        <a href={properties.doklink} target="_blank" >Plandokument</a>
-                    </li>
-                 </ul>
-               </div>;
-               resolve(comp);
-            })
-        });
-     //   console.log(searchTerm);
-    },
-
-    handleMouseOver: function(s){
-        console.log('plan mouseover');
-        let url = `https://ballerup.mapcentia.com/api/v1/sql/collector?q=SELECT plannr, plannavn, doklink, anvendelsegenerel, 
-                   the_geom from snit_plansearch.lokalplan_geom where planid =${s}&srs=4326`;
-            return new Promise(function(resolve, reject){
-                $.getJSON(url,function(data){
-                    let geom = data.features[0].geometry;
-                    console.log(geom);
-                    let properties = data.features[0].properties;
-                    let layer = L.geoJson(geom,{
-                        "color": "blue",
-                        "weight": 1,
-                        "opacity": 1,
-                        "fillOpacity": 0.1,
-                        "dashArray": '5,3'
-                    });
-        
-                    layerGroup.clearLayers();
-                    layerGroup.addLayer(layer).addTo(mapObj);
-                    mapObj.fitBounds(layer.getBounds());
-                    console.log('plan mouseover');
+                console.log('plan mouseover');
                 resolve('hello');
             })
         })
     },
 
-    handleMouseOut: function(s){
-        return new Promise(function(resolve, reject){
+    handleMouseOut: function (s) {
+        return new Promise(function (resolve, reject) {
             console.log(s);
             resolve('hello');
         })
