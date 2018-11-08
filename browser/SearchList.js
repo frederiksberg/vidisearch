@@ -17,6 +17,7 @@ class SearchList extends React.Component {
         };
     }
 
+
     caculateItemCountToShow(searcherCount) {
         switch (searcherCount) {
             case 1:
@@ -30,12 +31,33 @@ class SearchList extends React.Component {
         }
     }
 
+    highlightSearchInText(text) {
+        let searchTerm = this.props.searchTerm.toLowerCase();
+        let textLower = text.toLowerCase();
+
+        let indexOf = textLower.indexOf(searchTerm);
+
+        if (indexOf == -1 || searchTerm === '') {
+            return null;
+        }
+
+        let startString = text.substring(0, indexOf);
+        let middleString = text.substring(indexOf, indexOf + searchTerm.length);
+        let endString = text.substring(indexOf + searchTerm.length, text.length);
+
+        return {
+            start: startString,
+            middle: middleString,
+            end: endString
+        }
+    }
+
     renderCategory(seacherName, searcher, searcherCount, selectionOptions) {
 
         let numberOfitems = this.caculateItemCountToShow(searcherCount);
         let itemsToShow = searcher.results.slice(0, numberOfitems);
 
-        const searchItems = itemsToShow.map((item, index) => { return this.renderItems(item, index, seacherName,selectionOptions) });
+        const searchItems = itemsToShow.map((item, index) => { return this.renderItems(item, index, seacherName, selectionOptions) });
 
         return (
             <div key={seacherName}>
@@ -51,21 +73,20 @@ class SearchList extends React.Component {
         )
     }
 
-    renderItems(item, index, seacherName,selectionOptions) {
+    renderItems(item, index, seacherName, selectionOptions) {
 
-        let key = index + ':' + item.id;
         selectionOptions.currentIndex++;
 
-        let className = 'result';
+        let className = selectionOptions.selected == selectionOptions.currentIndex ? 'result selected' : 'result';
+        let highlight = this.highlightSearchInText(item.name);
 
-        if (selectionOptions.selected ==  selectionOptions.currentIndex){
-            className += ' selected'
-        }
+        let element = highlight ?
+            <div className="text" >{highlight.start} <span>{highlight.middle}</span> {highlight.end}</div> :
+            <div className="text" >{item.name}</div>
 
         return (
-            <ListItem key={key} className={className} onClick={() => this.props.onResultClick(seacherName, item)}>
-                <ListItemText className="text" primary={item.name} />
-                <ChevronRight />
+            <ListItem key={index} className={className} onClick={() => this.props.onResultClick(seacherName, item)}>
+                {element}
             </ListItem>
         )
     }
@@ -73,14 +94,14 @@ class SearchList extends React.Component {
     render() {
         const { searchResults, selectedResult } = this.props;
 
-        let resultElements = []
+        //Used to make navigation with the arrow keys possible
+        let selectionOptions = {
+            selected: selectedResult,
+            currentIndex: 0
+        }
 
         let searcherCount = Object.keys(searchResults).length;
-
-        let selectionOptions = {
-            selected:selectedResult,
-            currentIndex:0
-        }
+        let resultElements = []
 
         for (let searcherName in searchResults) {
             let searcher = searchResults[searcherName];

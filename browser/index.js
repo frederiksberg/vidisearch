@@ -237,6 +237,7 @@ module.exports = {
                                     />
                                 </FormControl>
                                 <SearchList
+                                    searchTerm={this.state.searchTerm}
                                     searchResults={this.state.searchResults}
                                     selectedResult={this.state.selectedResult}
                                     onCategoryClick={(category) => this.onCategoryClick(category)}
