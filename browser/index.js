@@ -77,6 +77,7 @@ module.exports = {
                     searchDetails: < div ></div >
                 }, () => {
                     this.search(this.state.searchTerm);
+                    document.getElementById('search-field').focus();
                 });
             }
 
