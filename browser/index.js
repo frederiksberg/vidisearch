@@ -35,7 +35,7 @@ module.exports = {
     },
 
     init: function () {
-        utils.createMainTab(exId, __("Main Search!"), __("Search prototype...."), require('./../../../browser/modules/height')().max, 'search');
+        utils.createMainTab(exId, __("Søg"), __("Søg i adresser, matrikler, planer, lag og andet"), require('./../../../browser/modules/height')().max, 'search');
 
         class MainSearch extends React.Component {
             constructor(props) {
