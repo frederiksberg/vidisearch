@@ -1,7 +1,9 @@
 # vidisearch
 
 Vidisearch is a vidi search extension.
-Currently it can be used to search DAWA (addresses), Geosearch (matrikler), elasticsearch (plandokumenter).
+Currently it can be used to search DAWA (addresses), Geosearch (matrikler), elasticsearch (plandokumenter) and layers from GC2.
+
+![vidiserach](https://user-images.githubusercontent.com/7534153/48827359-56e70900-ed6d-11e8-9df0-f6a948b61ca8.PNG)
 
 New searcher can be easily added by following these steps:
 
