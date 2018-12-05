@@ -19,7 +19,7 @@ router.get('/api/extension/vidisearch/cvr', function (req, httpResponse) {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": "Basic RnJlZGVyaWtzYmVyZ19Lb21tdW5lX0NWUl9JX1NLWUVOOmZlNzAxNjJhLWMwZmQtNGI3Ni1hMzY2LWJkYTdlYTU5NmJhZA==",
+            "Authorization": config.extensionConfig.vidisearch.cvr.auth,
         },
     }
 
