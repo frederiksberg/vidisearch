@@ -228,7 +228,7 @@ module.exports = {
         setCaretPosition(roadName.length + 1);
 
         return new Promise(function (resolve, reject) {
-            resolve({ component: <div>{newQuery}</div>, newQuery: newQuery });
+            resolve({ component: <div>{newQuery}</div>, newQuery: newQuery, showSearcher:true });
         })
     },
 

@@ -164,7 +164,7 @@ module.exports = {
                     </div>
                 </div>
 
-            resolve({ component: comp, newQuery: null });
+            resolve({ component: comp, newQuery: null, showSearcher:false });
         });
     }
 };
