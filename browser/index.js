@@ -125,7 +125,7 @@ module.exports = {
 
                 for (let seacherName in this.searchers) {
                     if (this.state.enabledSearchers.includes(seacherName)) {
-                        searchPromises.push(this.searchers[seacherName].searcher.search(searchQuery));
+                        searchPromises.push(this.searchers[seacherName].searcher.search(searchQuery.toLowerCase()));
                     }
                 }
 
