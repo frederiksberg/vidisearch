@@ -46,7 +46,7 @@ module.exports = {
     },
 
     search: function (searchTerm) {
-        let url = 'http://gc2.frederiksberg.dk/api/v2/elasticsearch/search/frederiksberg/elasticsearch/lokalplan_dokument';
+        let url = 'https://gc2.frederiksberg.dk/api/v2/elasticsearch/search/frederiksberg/elasticsearch/lokalplan_dokument';
         let query = `{
             "_source":{
               "excludes":[
@@ -76,7 +76,7 @@ module.exports = {
     },
 
     handleSearch: function (item, setCaretPosition) {
-        let url = `http://gc2.frederiksberg.dk/api/v1/sql/frederiksberg?q=SELECT plannr, plannavn, doklink, 
+        let url = `https://gc2.frederiksberg.dk/api/v1/sql/frederiksberg?q=SELECT plannr, plannavn, doklink, 
         the_geom from job_plandatadk.lokalplan where planid =${item.id}&srs=4326`;
 
         return new Promise(function (resolve, reject) {
@@ -115,7 +115,7 @@ module.exports = {
 
     handleMouseOver: function (s) {
         console.log('plan mouseover');
-        let url = `http://gc2.frederiksberg.dk/api/v1/sql/frederiksberg?q=SELECT plannr, plannavn, doklink, 
+        let url = `https://gc2.frederiksberg.dk/api/v1/sql/frederiksberg?q=SELECT plannr, plannavn, doklink, 
         the_geom from job_plandatadk.lokalplan where planid =${searchTerm}&srs=4326`;
         return new Promise(function (resolve, reject) {
             $.getJSON(url, function (data) {
