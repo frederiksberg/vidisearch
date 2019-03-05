@@ -177,7 +177,7 @@ module.exports = {
 
             let resultLayer = new L.FeatureGroup();
 
-            resolve({ component: comp, newQuery: item.id });
+            resolve({ component: comp, newQuery: item.id, showSearcher:false });
         });
     },
 

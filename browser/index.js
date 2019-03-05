@@ -17,6 +17,11 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import IconButton from '@material-ui/core/IconButton';
 import SearchList from './SearchList';
 import SearchSelector from './SearchSelector';
+import Card from '@material-ui/core/Card';
+import CardActions from '@material-ui/core/CardActions';
+import CardContent from '@material-ui/core/CardContent';
+import Button from '@material-ui/core/Button';
+import Typography from '@material-ui/core/Typography';
 
 var cloud;
 var utils;
@@ -35,7 +40,7 @@ module.exports = {
     },
 
     init: function () {
-        utils.createMainTab(exId, __("Main Search!"), __("Search prototype...."), require('./../../../browser/modules/height')().max, 'search');
+        utils.createMainTab(exId, __("Søg"), __("Søg i adresser, matrikler, planer, lag og andet"), require('./../../../browser/modules/height')().max, 'search');
 
         class MainSearch extends React.Component {
             constructor(props) {
@@ -51,6 +56,7 @@ module.exports = {
                     enabledSearchers: [...searcherNames],
                     searchTerm: '',
                     selectedResult: 0,
+                    showSearcher: true,
                     resultSize: 0, //used for movement with arrow keys
                     searchResults: {},
                     searchDetails: <div></div>
@@ -77,6 +83,7 @@ module.exports = {
                     searchDetails: < div ></div >
                 }, () => {
                     this.search(this.state.searchTerm);
+                    document.getElementById('search-field').focus();
                 });
             }
 
@@ -87,7 +94,8 @@ module.exports = {
 
                     this.setState({
                         searchTerm: isNewQuery ? result.newQuery : this.state.searchTerm,
-                        searchDetails: result.component
+                        searchDetails: result.component,
+                        showSearcher: result.showSearcher
                     }, () => {
                         this.search(this.state.searchTerm);
                     })
@@ -117,7 +125,7 @@ module.exports = {
 
                 for (let seacherName in this.searchers) {
                     if (this.state.enabledSearchers.includes(seacherName)) {
-                        searchPromises.push(this.searchers[seacherName].searcher.search(searchQuery));
+                        searchPromises.push(this.searchers[seacherName].searcher.search(searchQuery.toLowerCase()));
                     }
                 }
 
@@ -214,39 +222,51 @@ module.exports = {
 
                 return (
                     <div role="tabpanel" className="vidi-search">
-                        <SearchSelector searchers={this.searchers} enabledSearchers={this.state.enabledSearchers} onSeachersChanged={(enabledSearchers) => this.searchersChanged(enabledSearchers)} />
-                        <div className="panel panel-default">
-                            <div className="panel-body">
-                                <FormControl fullWidth>
-                                    <InputLabel htmlFor="search-field">Søg</InputLabel>
-                                    <Input
-                                        id="search-field"
-                                        className="search"
-                                        type="text"
-                                        value={this.state.searchTerm}
-                                        onKeyUp={(e) => this.handleKeyboard(e)}
-                                        onKeyDown={(e) => this.handleKeyDown(e)}
-                                        onChange={this.handleChange}
-                                        endAdornment={
-                                            <InputAdornment position="end">
-                                                <IconButton onClick={this.clearSearchBox} >
-                                                    {this.state.searchTerm ? <HighlightOff /> : <Search />}
-                                                </IconButton>
-                                            </InputAdornment>
-                                        }
-                                    />
-                                </FormControl>
-                                <SearchList
-                                    searchTerm={this.state.searchTerm}
-                                    searchResults={this.state.searchResults}
-                                    selectedResult={this.state.selectedResult}
-                                    onCategoryClick={(category) => this.onCategoryClick(category)}
-                                    onResultClick={(category, item) => this.onResultClick(category, item)}
-                                    onResultSetUpdated={(count) => this.onResultSetUpdated(count)}
-                                />
+                        {!this.state.showSearcher && <Card style={{ padding: '8px' }}>
+                            <CardContent>
                                 {this.state.searchDetails}
+                            </CardContent>
+                            <CardActions>
+                                <Button className="back-btn" variant="outlined" onClick={() => {this.setState({showSearcher:true})}}>Tilbage</Button>
+                            </CardActions>
+                        </Card>}
+
+                        {this.state.showSearcher && <div>
+                            <SearchSelector searchers={this.searchers} enabledSearchers={this.state.enabledSearchers} onSeachersChanged={(enabledSearchers) => this.searchersChanged(enabledSearchers)} />
+                            <div className="panel panel-default">
+                                <div className="panel-body">
+                                    <FormControl fullWidth>
+                                        <InputLabel htmlFor="search-field">Søg</InputLabel>
+                                        <Input
+                                            id="search-field"
+                                            className="search"
+                                            type="text"
+                                            value={this.state.searchTerm}
+                                            onKeyUp={(e) => this.handleKeyboard(e)}
+                                            onKeyDown={(e) => this.handleKeyDown(e)}
+                                            onChange={this.handleChange}
+                                            endAdornment={
+                                                <InputAdornment position="end">
+                                                    <IconButton onClick={this.clearSearchBox} >
+                                                        {this.state.searchTerm ? <HighlightOff /> : <Search />}
+                                                    </IconButton>
+                                                </InputAdornment>
+                                            }
+                                        />
+                                    </FormControl>
+                                    <SearchList
+                                        searchTerm={this.state.searchTerm}
+                                        searchResults={this.state.searchResults}
+                                        selectedResult={this.state.selectedResult}
+                                        onCategoryClick={(category) => this.onCategoryClick(category)}
+                                        onResultClick={(category, item) => this.onResultClick(category, item)}
+                                        onResultSetUpdated={(count) => this.onResultSetUpdated(count)}
+                                    />
+
+                                </div>
                             </div>
-                        </div>
+                        </div>}
+
                     </div>
                 );
             }

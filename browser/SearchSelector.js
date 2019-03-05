@@ -51,7 +51,7 @@ class SearchSelector extends React.Component {
         let categories = this.state.searchers.map((item, index) => {
             let enabled = this.props.enabledSearchers.includes(item.id);
             return (
-                <Tooltip key={item.id} title={item.id}>
+                <Tooltip PopperProps={{className:"MuiTooltip-tooltip-custom"}}  key={item.id} title={item.id}>
                     <div  onClick={() => this.onClick(index)} className={enabled ? "button enabled" : "button"}>{item.icon}</div>
                 </Tooltip>
             )

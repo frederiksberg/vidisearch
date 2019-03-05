@@ -107,7 +107,7 @@ module.exports = {
                         </li>
                     </ul>
                 </div>;
-                resolve({ component: comp, newQuery: item.id });
+                resolve({ component: comp, newQuery: null, showSearcher:false });
             })
         });
         //   console.log(searchTerm);
