@@ -7,7 +7,6 @@ var React = require('react');
 
 var ReactDOM = require('react-dom');
 
-import Divider from '@material-ui/core/Divider';
 import Search from '@material-ui/icons/Search';
 import HighlightOff from '@material-ui/icons/HighlightOff';
 import FormControl from '@material-ui/core/FormControl';
@@ -21,7 +20,6 @@ import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
-import Typography from '@material-ui/core/Typography';
 
 var cloud;
 var utils;

@@ -5,7 +5,7 @@ import SvgIcon from '@material-ui/core/SvgIcon';
 /**
  * @type {*|exports|module.exports}
  */
-var React = require('react');;
+var React = require('react');
 
 var cloud;
 

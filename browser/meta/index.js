@@ -16,25 +16,17 @@ var db = urlparser.db;
  */
 var React = require('react');
 
-var ReactDOM = require('react-dom');
-
+import mustache from 'mustache';
 import SvgIcon from '@material-ui/core/SvgIcon';
-import Business from '@material-ui/icons/Business';
+import dayjs from 'dayjs';
 
 var cloud;
 
-var layerGroup = L.layerGroup();
-
 var utils;
-
-var mapObj;
 
 var legend;
 
-var showdown = require('showdown');
-var converter = new showdown.Converter();
-
-var exId = "meta";
+const marked = require('marked');
 
 var config = require('../../../../config/config.js');
 
@@ -46,7 +38,8 @@ var moduleName = 'Lag'
 
 function LayerIcon(props) {
     return <SvgIcon {...props}>
-        <path fill="#000000" d="M12,16L19.36,10.27L21,9L12,2L3,9L4.63,10.27M12,18.54L4.62,12.81L3,14.07L12,21.07L21,14.07L19.37,12.8L12,18.54Z" />
+        <path fill="#000000"
+              d="M12,16L19.36,10.27L21,9L12,2L3,9L4.63,10.27M12,18.54L4.62,12.81L3,14.07L12,21.07L21,14.07L19.37,12.8L12,18.54Z"/>
     </SvgIcon>;
 }
 
@@ -55,13 +48,11 @@ module.exports = {
         cloud = o.cloud;
         utils = o.utils;
         legend = o.legend;
-        mapObj = cloud.get().map;
         mainSearch = o.extensions.vidisearch.index;
 
-        let me = this;
         mainSearch.registerSearcher({
             key: moduleName,
-            obj: { 'searcher': this, 'title': moduleName, 'icon': <LayerIcon /> }
+            obj: {'searcher': this, 'title': moduleName, 'icon': <LayerIcon/>}
         });
     },
 
@@ -69,7 +60,7 @@ module.exports = {
     },
 
     search: function (searchTerm) {
-        let url = config.gc2.host + '/api/v2/elasticsearch/search/' + db + '/settings/geometry_columns_view';
+        let url = '/api/elasticsearch/search/' + db + '/settings/geometry_columns_view';
         let query = {
             "size": 100,
             "query": {
@@ -106,25 +97,29 @@ module.exports = {
         };
 
         return new Promise(function (resolve, reject) {
-            $.post(url, JSON.stringify(query), function (data) {
-                let res = data.hits.hits.map((item) => {
-                    let it = item['_source']['properties'];
-                    items[it._key_] = item['_source'];
-                    return {
-                        name: (it.f_table_title || it.f_table_name),
-                        'id': it._key_
-                    };
-                });
-                resolve({ 'type': moduleName, icon: <LayerIcon />, results: res });
-            }, 'json');
+            $.ajax({
+                url: url,
+                type: "POST",
+                data: JSON.stringify(query),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    let res = data.hits.hits.map((item) => {
+                        let it = item['_source']['properties'];
+                        items[it._key_] = item['_source'];
+                        return {
+                            name: (it.f_table_title || it.f_table_name),
+                            'id': it._key_
+                        };
+                    });
+                    resolve({'type': moduleName, icon: <LayerIcon/>, results: res});
+                }
+            })
         });
-
     },
 
     handleSearch: function (item, setCaretPosition) {
-
         let properties = items[item.id].properties, html, meta, name, title, abstract, layerId;
-
 
         setCaretPosition(item.name.length);
 
@@ -135,36 +130,36 @@ module.exports = {
         html = (meta !== null
             && typeof meta.meta_desc !== "undefined"
             && meta.meta_desc !== "") ?
-            converter.makeHtml(meta.meta_desc) : abstract;
+            marked(meta.meta_desc) : abstract;
         layerId = item.id.split(".")[0] + "." + item.id.split(".")[1];
 
-        moment.locale('da');
+        dayjs().locale(navigator.language.indexOf(`da_`) === 0 ? "da" : "en");
 
         for (let key in properties) {
             if (properties.hasOwnProperty(key)) {
                 if (key === "lastmodified") {
-                    properties[key] = moment(properties[key]).format('LLLL');
+                    properties[key] = dayjs(properties[key]).format('LLLL');
                 }
             }
         }
 
-        //html = html ? Mustache.render(html, properties) : "";
+       // html = html ? mustache.render(html, properties) : "";
 
         return new Promise(function (resolve, reject) {
 
             let comp =
                 <div>
-                    <h3 className="content" >{title || name}</h3>
+                    <h3 className="content">{title || name}</h3>
                     <div className="content"></div>
                     <div>
                         <li className='list-group-item'>
-                            <div className='checkbox'><label><input type='checkbox' data-gc2-id={layerId} />{title}
+                            <div className='checkbox'><label><input type='checkbox' data-gc2-id={layerId}/>{title}
                             </label></div>
                         </li>
                     </div>
                 </div>
 
-            resolve({ component: comp, newQuery: null, showSearcher:false });
+            resolve({component: comp, newQuery: null, showSearcher: false});
         });
     }
 };
@@ -183,7 +178,7 @@ class Tags extends React.Component {
             );
         });
         return (
-            <ul style={{ listStyleType: "none" }} className="list-group"> {items} </ul>
+            <ul style={{listStyleType: "none"}} className="list-group"> {items} </ul>
         );
     }
 }
